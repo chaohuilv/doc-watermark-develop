@@ -1,6 +1,8 @@
-package com.chaohuilv.docwatermark.utils;
+package com.chaohuilv.docwatermark.service.impl;
 
 import com.chaohuilv.docwatermark.config.FTPConfig;
+import com.chaohuilv.docwatermark.model.FTPModel;
+import com.chaohuilv.docwatermark.service.FTPService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -10,23 +12,32 @@ import java.io.*;
 import java.net.SocketException;
 
 @Slf4j
-public class FTPUtils {
+public class FTPServiceImpl implements FTPService {
 
+    //ftp client
     private FTPClient ftpClient;
 
-    public FTPUtils() {
+    //ftp地址配置信息
+    private FTPConfig ftpConfig;
+
+    public void setFtpConfig(FTPConfig ftpConfig) {
+        this.ftpConfig = ftpConfig;
+    }
+
+    public FTPServiceImpl() {
 
     }
 
-    public synchronized boolean connectServer(FTPConfig ftpConfig) {
+    @Override
+    public synchronized boolean connectServer() {
         ftpClient = new FTPClient();
-        ftpClient.setControlEncoding(ftpConfig.getFtpEncode());//解决上传文件时文件名乱码
+        ftpClient.setControlEncoding(this.ftpConfig.getFtpEncode());//解决上传文件时文件名乱码
         int reply = 0 ;
         try {
             // 连接至服务器
-            ftpClient.connect(ftpConfig.getFtpIp(),ftpConfig.getFtpPort());
+            ftpClient.connect(this.ftpConfig.getFtpIp(),this.ftpConfig.getFtpPort());
             // 登录服务器
-            ftpClient.login(ftpConfig.getFtpUserName(), ftpConfig.getFtpPassword());
+            ftpClient.login(this.ftpConfig.getFtpUserName(), this.ftpConfig.getFtpPassword());
             //登陆成功，返回码是230
             reply = ftpClient.getReplyCode();
             // 判断返回码是否合法
@@ -39,16 +50,15 @@ public class FTPUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
         return true;
     }
 
-    //判断ftp服务器文件是否存在
-    public boolean existFile(String path)  {
+    @Override
+    public synchronized boolean existFile(FTPModel ftpModel) {
         boolean flag = false;
         FTPFile[] ftpFileArr;
         try {
-            ftpFileArr = ftpClient.listFiles(path);
+            ftpFileArr = ftpClient.listFiles(ftpModel.getPath());
             if (ftpFileArr.length > 0) {
                 flag = true;
             }
@@ -58,13 +68,14 @@ public class FTPUtils {
         return flag;
     }
 
-    //删除ftp文件
-    public synchronized boolean deleteFile(String pathname, String filename){
+    @Override
+    public synchronized boolean deleteFile(FTPModel ftpModel) {
         boolean flag = false;
         try {
             //切换FTP目录
-            ftpClient.changeWorkingDirectory(pathname);
-            ftpClient.dele(filename);
+            ftpClient.changeWorkingDirectory(ftpModel.getPathName());
+            //删除文件
+            ftpClient.dele(ftpModel.getFileName());
             ftpClient.logout();
             flag = true;
             log.info("删除文件成功");
@@ -85,28 +96,19 @@ public class FTPUtils {
         return flag;
     }
 
-    /**
-     * 从FTP server下载到本地文件夹
-     * @param remoteFile 远程文件
-     * @param localFile 本地文件
-     * @return
-     */
-    public synchronized String download(String remoteFile,String localFile){
+    @Override
+    public synchronized String download(FTPModel ftpModel) {
         String path = "";
         FTPFile[] fs=null;
         try {
-            fs = ftpClient.listFiles(remoteFile);
+            fs = ftpClient.listFiles(ftpModel.getRemoteFile());
             if(fs.length<0) {
                 return path;
             }
             //1、遍历FTP路径下所有文件
             for(FTPFile file:fs){
-                //File localfile = new File(localFile);
                 //2、保存到本地
-               /* 在lunix上要用InputStream input = ftp.retrieveFileStream(new String(fileName.getBytes("GBK"),"ISO-8859-1"));
-                重要的是retrieveFileStream这个方法，而且前边要加ftp.enterLocalPassiveMode();
-                在windows系统上边发的服务要用 ftpClient.retrieveFile(new String(ff.getName().getBytes("GBK"),"ISO-8859-1"), out);*/
-                path = localFile + File.separatorChar + file.getName();
+                path = ftpModel.getLocalPath() + File.separatorChar + file.getName();
                 File local = new File(path);
                 if (!local.getParentFile().exists()) {
                     local.getParentFile().mkdirs();
@@ -116,7 +118,7 @@ public class FTPUtils {
                     continue;
                 }
                 OutputStream os = new FileOutputStream(local);
-                boolean retrieveStatus = ftpClient.retrieveFile(remoteFile, os);
+                ftpClient.retrieveFile(new String(ftpModel.getRemoteFile().getBytes("GBK"),"ISO-8859-1"), os);
                 os.flush();
                 os.close();
             }
@@ -126,17 +128,13 @@ public class FTPUtils {
         return path;
     }
 
-    /**
-     * 上传文件
-     * @param remoteFile
-     * @param localFile
-     * @return
-     */
-    public synchronized boolean upload(String remoteFile , String localFile) {
+
+    @Override
+    public synchronized boolean upload(FTPModel ftpModel) {
         try {
 
             //切换工作路径，设置上传的路径
-            ftpClient.changeWorkingDirectory(localFile);
+            ftpClient.changeWorkingDirectory(ftpModel.getLocalPath());
             //设置1M缓冲
             ftpClient.setBufferSize(1024);
             // 设置被动模式
@@ -148,9 +146,9 @@ public class FTPUtils {
              * 第二个参数：上传文档的inputStream
              * 在前面设置好路径，缓冲，编码，文件类型后，开始上传
              */
-            File file= new File(localFile) ;    // 声明File对象
+            File file= new File(ftpModel.getLocalPath()) ;    // 声明File对象
             InputStream inputStream = new FileInputStream(file);
-            ftpClient.storeFile(remoteFile, inputStream);
+            ftpClient.storeFile(ftpModel.getRemoteFile(), inputStream);
             inputStream.close();
             return true;
         } catch (IOException e) {
@@ -162,18 +160,18 @@ public class FTPUtils {
         } finally {
             closeClient();
         }
-
     }
 
-    public boolean checkSubfolder(String path, String subfolderName) {
+    @Override
+    public synchronized boolean checkSubfolder(FTPModel ftpModel) {
         try {
             //切换到FTP根目录
-            ftpClient.changeWorkingDirectory(path);
+            ftpClient.changeWorkingDirectory(ftpModel.getPath());
             //查看根目录下是否存在该文件夹
-            InputStream is = ftpClient.retrieveFileStream(new String(subfolderName.getBytes("UTF-8")));
+            InputStream is = ftpClient.retrieveFileStream(new String(ftpModel.getSubfolderName().getBytes("UTF-8")));
             if (is == null || ftpClient.getReplyCode() == FTPReply.FILE_UNAVAILABLE) {
                 //若不存在该文件夹，则创建文件夹
-                return createSubfolder(path,subfolderName);
+                return createSubfolder(ftpModel);
             }
             if (is != null) {
                 is.close();
@@ -187,10 +185,11 @@ public class FTPUtils {
         return false;
     }
 
-    public synchronized boolean createSubfolder(String path,String subfolderName){
+    @Override
+    public synchronized boolean createSubfolder(FTPModel ftpModel) {
         try {
-            ftpClient.changeWorkingDirectory(path);
-            ftpClient.makeDirectory(subfolderName);
+            ftpClient.changeWorkingDirectory(ftpModel.getPath());
+            ftpClient.makeDirectory(ftpModel.getSubfolderName());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -199,11 +198,8 @@ public class FTPUtils {
         return true;
     }
 
-
-    /**
-     * 断开与远程服务器的连接
-     */
-    public void closeClient(){
+    @Override
+    public void closeClient() {
         if (ftpClient != null && ftpClient.isConnected()) {
             try {
                 ftpClient.disconnect();

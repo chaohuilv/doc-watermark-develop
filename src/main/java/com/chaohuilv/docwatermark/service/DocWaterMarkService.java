@@ -6,13 +6,13 @@ public interface DocWaterMarkService {
 
     /**
      * 添加水印
-     * @param docWaterMark
+     * @param docWaterMark 水印信息
      */
     void AddDocWaterMark(DocWaterMark docWaterMark);
 
     /**
      * 删除水印
-     * @param docWaterMark
+     * @param docWaterMark 水印信息
      */
     void RemoveWatermark(DocWaterMark docWaterMark);
 }

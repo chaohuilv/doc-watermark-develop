@@ -6,8 +6,7 @@ public class FileUtils {
 
     /**
      * 删除文件夹
-     * param folderPath 文件夹完整绝对路径
-     * @param folderPath
+     * @param folderPath  文件夹完整绝对路径
      */
     public static void delFolder(String folderPath) {
         try {
@@ -25,7 +24,7 @@ public class FileUtils {
     /**
      * 删除指定文件夹下所有文件
      * @param path 文件路径
-     * @return
+     * @return 是否成功
      */
     public static boolean delAllFile(String path) {
         boolean flag = false;

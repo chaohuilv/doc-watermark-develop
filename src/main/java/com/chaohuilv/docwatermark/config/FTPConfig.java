@@ -1,6 +1,8 @@
 package com.chaohuilv.docwatermark.config;
 
 
+import java.util.Objects;
+
 public class FTPConfig {
 
     private String ftpEncode; //编码方式
@@ -59,4 +61,36 @@ public class FTPConfig {
         return "ftp://"+ftpIp+":"+ftpPort;
     }
 
+    public FTPConfig() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FTPConfig ftpConfig = (FTPConfig) o;
+        return Objects.equals(ftpEncode, ftpConfig.ftpEncode) &&
+                Objects.equals(ftpIp, ftpConfig.ftpIp) &&
+                Objects.equals(ftpPort, ftpConfig.ftpPort) &&
+                Objects.equals(ftpUserName, ftpConfig.ftpUserName) &&
+                Objects.equals(ftpPassword, ftpConfig.ftpPassword) &&
+                Objects.equals(localPath, ftpConfig.localPath);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(ftpEncode, ftpIp, ftpPort, ftpUserName, ftpPassword, localPath);
+    }
+
+    @Override
+    public String toString() {
+        return "FTPConfig{" +
+                "ftpEncode='" + ftpEncode + '\'' +
+                ", ftpIp='" + ftpIp + '\'' +
+                ", ftpPort=" + ftpPort +
+                ", ftpUserName='" + ftpUserName + '\'' +
+                ", ftpPassword='" + ftpPassword + '\'' +
+                ", localPath='" + localPath + '\'' +
+                '}';
+    }
 }

@@ -1,11 +1,14 @@
 package com.chaohuilv.docwatermark.service.impl;
 
 import com.chaohuilv.docwatermark.model.DocWaterMark;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-public class PdfWaterMarkServiceImplTest extends TestCase {
+@SpringBootTest
+public class PdfWaterMarkServiceImplTest  {
 
-    public void testAddDocWaterMark() {
+    @Test
+    void testAddDocWaterMark() {
         DocWaterMark docWaterMark = new DocWaterMark();
         docWaterMark.setOutPutFilePath("D:\\桌面\\Pdf\\ces12.pdf");
         docWaterMark.setInPutFilePath("D:\\桌面\\Pdf\\ces12.pdf");
@@ -16,7 +19,8 @@ public class PdfWaterMarkServiceImplTest extends TestCase {
         docWaterMarkService.AddDocWaterMark(docWaterMark);
     }
 
-    public void testRemoveWatermark(){
+    @Test
+    void testRemoveWatermark(){
         DocWaterMark docWaterMark = new DocWaterMark();
         docWaterMark.setOutPutFilePath("D:\\桌面\\Pdf\\ces12.pdf");
         docWaterMark.setInPutFilePath("D:\\桌面\\Pdf\\ces12.pdf");

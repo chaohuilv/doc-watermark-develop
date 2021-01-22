@@ -19,7 +19,6 @@ public class DocWaterMarkServiceImpl {
     /**
      * 添加水印
      * @param docWaterMark 水印信息
-     * @return
      */
     public void AddDocWaterMark(DocWaterMark docWaterMark){
         this.docWaterMarkStrategy.AddDocWaterMark(docWaterMark);
@@ -27,7 +26,7 @@ public class DocWaterMarkServiceImpl {
 
     /**
      * 删除水印
-     * @param docWaterMark
+     * @param docWaterMark  水印信息
      */
     public void RemoveWatermark(DocWaterMark docWaterMark){
         this.docWaterMarkStrategy.RemoveWatermark(docWaterMark);

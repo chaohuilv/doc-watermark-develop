@@ -19,5 +19,4 @@ public class DocWaterMark {
 
     private String textWaterMarkName; //文字水印内容
 
-
 }

@@ -2,6 +2,7 @@ package com.chaohuilv.docwatermark.service.impl;
 
 import com.chaohuilv.docwatermark.model.DocWaterMark;
 import com.chaohuilv.docwatermark.service.DocWaterMarkService;
+import com.chaohuilv.docwatermark.utils.RemoveWatermarkUtils;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ public class PdfWaterMarkServiceImpl implements DocWaterMarkService {
 
     /**
      * pdf 添加水印
-     * @param docWatermark
+     * @param docWatermark 水印信息
      */
     public void AddDocWaterMark(DocWaterMark docWatermark) {
         ByteArrayOutputStream bosOutFile = new ByteArrayOutputStream();
@@ -84,7 +85,7 @@ public class PdfWaterMarkServiceImpl implements DocWaterMarkService {
 
     /**
      * 移除水印
-     * @param docWaterMark
+     * @param docWaterMark 移除水印的地址信息
      */
     public void RemoveWatermark(DocWaterMark docWaterMark){
         ByteArrayOutputStream bosOutFile = new ByteArrayOutputStream();
